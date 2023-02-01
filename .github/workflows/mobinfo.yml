@@ -1,0 +1,119 @@
+name: mobinfo auto-updater
+
+permissions:
+  contents: write
+  pages: write
+  id-token: write
+  actions: write
+  checks: write
+  deployments: write
+  issues: write
+  packages: write
+  pull-requests: write
+  repository-projects: write
+  security-events: write
+  statuses: write
+
+on:
+  push:
+    branches: 
+      - main
+    paths:
+      - 'README.md'
+      - 'docs/_config.yml'
+      - 'docs/_layouts/default.html'
+
+  workflow_dispatch:
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3.3.0
+        with:
+          ref: main
+          fetch-depth: 0
+
+      - name: Filter paths
+        uses: dorny/paths-filter@v2
+        id: changes
+        with:
+          filters: |
+            readme:
+              - 'README.md'
+
+      - name: Create new branch
+        if: steps.changes.outputs.readme == 'true'
+        run: |
+          git checkout -b "up2date" "main"
+
+      - name: Update website
+        if: steps.changes.outputs.readme == 'true'
+        run: |
+          cp -f "./README.md" "./docs/index.md"
+
+      - name: Update man-pages
+        if: steps.changes.outputs.readme == 'true'
+        run: |
+          sudo apt install help2man
+          sudo make install
+          help2man mobinfo -N -o docs/mobinfo.1
+
+      - name: Commit changes
+        if: steps.changes.outputs.readme == 'true'
+        run: |
+          git config user.name "github-actions"
+          git config --local user.email "github-actions@github.com"
+          git add .
+          git commit -m "BOT: Updates man-pages and website (GHP)" -a
+
+      - name: Push changes
+        if: steps.changes.outputs.readme == 'true'
+        run: |
+          git push origin "up2date"
+
+      - name: Create new pull-request
+        if: steps.changes.outputs.readme == 'true'
+        run: |
+          echo ${{ secrets.GITHUB_TOKEN }} | gh auth login --with-token
+          gh pr create -B "main" -H "up2date" -f -l "automerge"
+
+      - name: Merge pull-request
+        if: steps.changes.outputs.readme == 'true'
+        run: |
+          echo ${{ secrets.GITHUB_TOKEN }} | gh auth login --with-token
+          gh pr merge -s --auto
+
+  build:
+    runs-on: ubuntu-latest
+    needs: update
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3.3.0
+        with:
+          ref: main
+          fetch-depth: 0
+
+      - name: Setup website
+        uses: actions/configure-pages@v3.0.0
+
+      - name: Build website
+        uses: actions/jekyll-build-pages@v1.0.6
+        with:
+          source: ./docs/
+          destination: ./_site
+
+      - name: Upload website
+        uses: actions/upload-pages-artifact@v1.0.7
+
+  deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+      - name: Deploy website
+        id: deployment
+        uses: actions/deploy-pages@v1.2.3

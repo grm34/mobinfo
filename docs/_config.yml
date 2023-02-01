@@ -1,0 +1,12 @@
+title: mobinfo
+tagline: A command-line tool that offers mobile phone information.
+description: A command-line tool that offers mobile phone information ⚡
+url: https://grm34.github.io/mobinfo
+author:
+  name: darkmaster @grm34
+  url: https://github.com/grm34
+google_analytics: G-XRXTP3G5KE
+plugins:
+  - jekyll-seo-tag
+  - jekyll-sitemap
+theme: jekyll-theme-midnight
