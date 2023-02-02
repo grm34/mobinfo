@@ -305,7 +305,7 @@ phonesdata_request() {
     search|brands|comingsoon)
       local entry data r=('(?>=list-items).*?(?=</a>)')
       # Get the line from html string.
-      : "$(printf '%s' "$html" | grep -oP "${r[0]}")"
+      : "$(printf '%s' "$html" | grep -m 1 -oP "${r[0]}")"
       # Get the data of each device.
       readarray -t data < \
         <(printf '%s' "${_//=list-items><a href=}")
