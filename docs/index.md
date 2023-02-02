@@ -1,15 +1,16 @@
-<p align="center">
-  <a href="https://github.com/grm34/mobinfo">
+<!-- markdownlint-disable-file MD033 -->
+<h1 align="center">
+  <a href="#">
     <img alt="mobinfo" height="180px" src="https://raw.githubusercontent.com/grm34/mobinfo/main/docs/assets/images/mobinfo.png">
   </a>
-</p>
+</h1>
 
 <p align="center">
   <a href="https://github.com/grm34/mobinfo/blob/main/LICENSE">
     <img  alt="license" src="https://img.shields.io/badge/license-GPLv3.0-blue.svg">
   </a>
   <a href="https://github.com/grm34/mobinfo/releases">
-    <img  alt="release" src="https://img.shields.io/badge/release-0.1.0--beta-blue.svg">
+    <img  alt="release" src="https://img.shields.io/badge/release-0.1.0-blue.svg">
   </a>
   <a href="https://github.com/grm34/mobinfo/actions/workflows/mobinfo.yml">
     <img  alt="updater" src="https://github.com/grm34/mobinfo/actions/workflows/mobinfo.yml/badge.svg">
@@ -28,12 +29,14 @@ directly from your favorite terminal.
 ```
 
 <p align="center">
-  <a href="https://github.com/grm34/mobinfo">
+  <a href="#">
     <img  alt="demo" src="https://raw.githubusercontent.com/grm34/mobinfo/main/docs/assets/images/mobinfo.gif">
   </a>
 </p>
 
-## Add it up
+<h2>
+  Add it up
+</h2>
 
 * Intall it with make
 
@@ -66,7 +69,9 @@ mobinfo() { bash ~/.mobinfo/mobinfo "$@" ;}
 > *Definition of a function or an  alias may differ from*
 > *one shell to another so adapting may be necessary.*
 
-## HowTo
+<h2>
+  HowTo
+</h2>
 
 ```text
 Usage: mobinfo [OPTIONS]... <arguments>... [FILTERS]...
@@ -145,10 +150,24 @@ Report bugs to https://github.com/grm34/mobinfo/issues
 
 > *You may need to install `bash` `curl` `grep` first.*
 
-## Screenshots
+<h2>
+  Screenshots
+</h2>
 
-[![mobinfo_dark](https://raw.githubusercontent.com/grm34/mobinfo/main/docs/assets/images/mobinfo_dark.png)](#)
+<p align="center">
+  <a href="#">
+    <img  alt="mobinfo_dark" src="https://raw.githubusercontent.com/grm34/mobinfo/main/docs/assets/images/mobinfo_dark.png">
+  </a>
+</p>
 
-[![mobinfo_light](https://raw.githubusercontent.com/grm34/mobinfo/main/docs/assets/images/mobinfo_light.png)](#)
+<p align="center">
+  <a href="#">
+    <img  alt="mobinfo_light" src="https://raw.githubusercontent.com/grm34/mobinfo/main/docs/assets/images/mobinfo_light.png">
+  </a>
+</p>
 
-[![mobinfo_hack](https://raw.githubusercontent.com/grm34/mobinfo/main/docs/assets/images/mobinfo_hack.png)](#)
+<p align="center">
+  <a href="#">
+    <img  alt="mobinfo_hack" src="https://raw.githubusercontent.com/grm34/mobinfo/main/docs/assets/images/mobinfo_hack.png">
+  </a>
+</p>
