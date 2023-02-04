@@ -182,6 +182,7 @@ clean_string() {
   # Replace unwanted ascii chars.
   : "${1//µm/um}" && : "${_//ƒ/f}" && : "${_//·/.}"
   : "${_//&amp;/\&}" && : "${_//[[:space:]]&nbsp;}"
+  : "${_//€/Euros}" && : "${_//$/Dollars}"
   # Trim leading and trailing white-space.
   # Credits: @dylanaraps (thanks).
   : "${_#"${_%%[![:space:]]*}"}"
