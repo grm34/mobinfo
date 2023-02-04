@@ -179,10 +179,8 @@ terminfo() {
 }
 
 clean_string() {
-  # Replace unwanted ascii chars.
-  : "${1//µm/um}" && : "${_//ƒ/f}" && : "${_//·/.}"
-  : "${_//&amp;/\&}" && : "${_//[[:space:]]&nbsp;}"
-  : "${_//€/Euros}" && : "${_//$/Dollars}"
+  # Replace unwanted html characters.
+  : "${1//&amp;/\&}" && : "${_//[[:space:]]&nbsp;}"
   # Trim leading and trailing white-space.
   # Credits: @dylanaraps (thanks).
   : "${_#"${_%%[![:space:]]*}"}"
@@ -212,11 +210,12 @@ row() {
   (( $3 > column )) && lines=$(($3 / col2))
   for ((i=0; i<=lines; i++)) {
     (( i != 0 )) && unset key
-    local rowtext="${2:$index:$column}"
+    local rowtext="${2:$index:$column}" spaces
     [[ -z $rowtext ]] && continue
-    output+=("$(printf '%s%b %-*s %b%s%b %-*s %b%s' \
+    spaces="$(printf '%*s' $((column - ${#rowtext})) '')"
+    output+=("$(printf '%s%b %-*s %b%s%b %s%s %b%s' \
                        "$asc1" "$row1c" "$col1" "$key" "$rmc" \
-                       "$asc1" "$row2c" "$column" "$rowtext" \
+                       "$asc1" "$row2c" "$rowtext" "$spaces" \
                        "$rmc" "$asc1")")
     index=$((index + column)) ;}
 }
@@ -236,9 +235,6 @@ store_specs() {
     # Properly clean input string.
     entry="$(clean_string "$entry")"
     [[ $alnum ]] && entry="${entry//[^[:alnum:][:blank:]>]}"
-    # Replace unwanted unicode white-space.
-    [[ -z $alnum && ${LANG^^} = *UTF* ]] &&
-      : "$(printf '%b' "\U00A0")" && entry="${entry//[$_]/ }"
     # Split into keyword/description.
     key="${entry%%>*}" && text="${entry#*>}"
     # Define keyword column length for RAW output.
@@ -266,7 +262,7 @@ select_device() {
   # Return the endpoint of the selected device/brand.
   [[ ${#devices[@]} != 1 && -z $auto ]] && {
     local d && printf '\n'
-    select d in "$@"; do { [[ $d ]] && break ;}; done
+    select d in "$@"; do [[ $d ]] && break; done
     local index=$((REPLY - 1)) ;}
   endpoint="${links[${index-0}]}"
   unset devices links
@@ -369,10 +365,10 @@ phonearena_request() {
                               | grep -oP "$delim")
       # Split into device/link and increment arrays.
       for entry in "${data[@]}"; do
-        : "${entry##*=\"}" && links+=("$_")
+        : "${entry##*=\"}" && links+=("$(clean_string "$_")")
         : "${entry##*=\"}" && : "${_##*phones/}"
         : "${_%%\_id*}"
-        devices+=("${_//-/ }")
+        devices+=("$(clean_string "${_//-/ }")")
       done ;;
   esac
   unset html
@@ -394,9 +390,8 @@ phonesdata_specs() {
     <(printf '%s' "$html" | grep -oP "${r[0]}")
   for entry in "${data[@]}"; do
     # Get keyword/description.
-    key="${entry%%<*}"
-    : "${entry##*/>}" && : "${_##*<td>}"
-    value="${_%%<*}"
+    key="${entry%%<*}" && : "${entry##*/>}"
+    : "${_##*<td>}" && value="${_%%<*}"
     # Increment the dedicated array.
     [[ $key = "$value" ]] && continue
     specs+=("$key>$value")
@@ -420,15 +415,15 @@ phonearena_specs() {
       continue # Ignore unwanted data.
     [[ $_ = *'<strong>'* ]] &&
       : "$(printf '%s' "$_" | grep -m 1 -oP "${r[2]}")"
-    key="$(clean_string "${_//$'\n'/ }")"
+    key="${_//$'\n'/ }"
     # Get description.
     : "$(printf '%s' "$entry" | grep -m 1 -oP "${r[3]}")"
     [[ $_ && $_ != *tooltip* ]] &&
-      : "$(clean_string "${_//$'\n'}")" && value="${_//    }"
+      : "${_//$'\n'}" && value="${_//    }"
     # Increment the dedicated array.
     [[ $key && $value = *[[:alnum:]]* &&
-        ! ${specs[*]} =~ ${key//:} ]] &&
-      specs+=("${key//:}>${value%%<a *}")
+      ! ${specs[*]} =~ ${key//:} ]] &&
+        specs+=("${key//:}>${value%%<a *}")
   done
   unset html
 }
