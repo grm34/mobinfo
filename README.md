@@ -38,11 +38,16 @@ directly from your favorite terminal.
   Add it up
 </h2>
 
+* Clone it
+
+```bash
+git clone --depth 1 https://github.com/grm34/mobinfo ~/.mobinfo
+```
+
 * Intall it with make
 
 ```bash
 # Install
-git clone --depth 1 https://github.com/grm34/mobinfo ~/.mobinfo
 cd ~/.mobinfo
 sudo make install
 
@@ -59,6 +64,8 @@ rm -rf ~/.mobinfo
 * Or run it directly from a function or an alias
 
 ```bash
+# Edit ~/.bashrc or whatever shell startup file.
+
 # Alias
 alias mobinfo="bash ~/.mobinfo/mobinfo"
 
@@ -66,7 +73,7 @@ alias mobinfo="bash ~/.mobinfo/mobinfo"
 mobinfo() { bash ~/.mobinfo/mobinfo "$@" ;}
 ```
 
-> *Definition of a function or an  alias may differ from*
+> *Definition of a function or an alias may differ from*
 > *one shell to another so adapting may be necessary.*
 
 <h2>
