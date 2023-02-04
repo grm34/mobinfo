@@ -87,6 +87,7 @@ GLOBAL:
 DATABASE:
   -ga, --gsmarena                Search on GSMArena (default).
   -pd, --phonesdata              Search on PhonesData (more results).
+  -pa, --phonearena              Search on PhoneArena (slower).
 
 FILTERING:
   -so, --specs-only              Show specifications only.
