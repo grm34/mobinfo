@@ -57,6 +57,7 @@ GLOBAL:
 DATABASE:
   -ga, --gsmarena                Search on GSMArena (default).
   -pd, --phonesdata              Search on PhonesData (more results).
+  -pa, --phonearena              Search on PhoneArena (slower).
 
 FILTERING:
   -so, --specs-only              Show specifications only.
@@ -169,7 +170,7 @@ terminfo() {
   [[ -z $COLUMNS ]] && COLUMNS="$(tput cols)"
   # Return table columns and max-width.
   max=120 && (( max >= COLUMNS )) && max=$((COLUMNS - 4))
-  col1=18 && (( db == 2 )) && col1=23
+  col1=18 && (( db == 2 )) && col1=23; (( db == 3 )) && col1=30
   col2=$((max - col1 - 7))
   # Get number of colors supported by the terminal.
   [[ -t 1 && -z $ansi ]] &&
@@ -240,8 +241,8 @@ store_specs() {
     # Split into keyword/description.
     key="${entry%%>*}" && text="${entry#*>}"
     # Define keyword column length for RAW output.
-    [[ $raw ]] && {
-      (( db == 1 )) && col1=18; (( db == 2 )) && col1=23 ;}
+    [[ $raw ]] && { (( db == 1 )) && col1=18
+      (( db == 2 )) && col1=23; (( db == 3 )) && col1=30 ;}
     # Ignore spec according to size and filters and options.
     [[ -z $specs_only ]] &&
       [[ ${#key} -ge $col1 || $text = [0-9] ]] && continue
@@ -341,6 +342,41 @@ phonesdata_request() {
   unset html
 }
 
+phonearena_request() {
+  # Manage the requests made to PhoneArena to obtain devices.
+  # Return devices names with links as arrays.
+  case "$1" in
+    brands)
+      local r=('listing-item-hover' \
+               '(?<=View all ).*?(?= cell phones)' \
+               '(?<=href=").*?(?=")')
+      get_devices "${r[@]}" ;;
+    search)
+      local r=(\
+        's="title"><a href="https://www.phonearena.com/phones/' \
+        '(?<=[0-9]">).*?(?=</a>)' '(?<=href=").*?(?=")')
+      get_devices "${r[@]}" ;;
+    devices_from_brand|latest|topbyfans)
+      local r=('<a href="https://www.phonearena.com/phones/' \
+               '(?>=").*?(?=" class)' '(?>=").*?(?=" target)')
+      local entry data delim="${r[1]}"
+      [[ $1 = 'devices_from_brand' &&
+        $endpoint != *manufacturers* ]] && delim="${r[2]}"
+      # Get the lines from html string as an array.
+      readarray -t data < \
+        <(printf '%s' "$html" | grep "${r[0]}" \
+                              | grep -oP "$delim")
+      # Split into device/link and increment arrays.
+      for entry in "${data[@]}"; do
+        : "${entry##*=\"}" && links+=("$_")
+        : "${entry##*=\"}" && : "${_##*phones/}"
+        : "${_%%\_id*}"
+        devices+=("${_//-/ }")
+      done ;;
+  esac
+  unset html
+}
+
 gsmarena_specs() {
   # Get the specs from GSMArena as an array.
   local r=('(?<=data-spec=").*?(?=<)')
@@ -367,21 +403,53 @@ phonesdata_specs() {
   unset html
 }
 
+phonearena_specs() {
+  # Get the specs from PhoneArena as an array.
+  # TODO: better way to get data that are split on several lines.
+  local lines entry data key value
+  local r=('(?<=<tr>).*?(?=</tr>)' '(?<=<th>).*?(?=</th>)' \
+           '(?<=<strong>).*?(?=</strong>)' \
+           '(?<=<td>).*?(?=</td>)')
+  readarray -t lines < <(printf '%s' "$html") && : "${lines[*]}"
+  readarray -t data < <(printf '%s' "$_" | grep -oP "${r[0]}")
+  for entry in "${data[@]}"; do
+    # Get keyword.
+    : "$(printf '%s' "$entry" | grep -m 1 -oP "${r[1]}")"
+    [[ -z $_ || $_ = *Manual* || $_ = *'target="_blank"'* ]] &&
+      continue # Ignore unwanted data.
+    [[ $_ = *'<strong>'* ]] &&
+      : "$(printf '%s' "$_" | grep -m 1 -oP "${r[2]}")"
+    key="$(clean_string "${_//$'\n'/ }")"
+    # Get description.
+    : "$(printf '%s' "$entry" | grep -m 1 -oP "${r[3]}")"
+    [[ $_ && $_ != *tooltip* ]] &&
+      : "$(clean_string "${_//$'\n'}")" && value="${_//    }"
+    # Increment the dedicated array.
+    [[ $key && $value = *[[:alnum:]]* &&
+        ! ${specs[*]} =~ ${key//:} ]] &&
+      specs+=("${key//:}>${value%%<a *}")
+  done
+  unset html
+}
+
 get_html() {
   # Call curl to retrieve html content as a string.
   case $db in
-    1)   html="$(curl -A "$agent" --max-time "${sec-5}" \
-                      -fsL "$1$2$3" "$verbose")" ;;
-    2) if [[ $research ]]; then 
+    1) html="$(curl -A "$agent" --max-time "${sec-5}" \
+                    -fsL "$1$2$3" "$verbose")" ;;
+    2) [[ $research ]] && {
          html="$(curl -A "$agent" --max-time "${sec-5}" \
-                      -d "model=$3"  -fsL "$1$2" "$verbose")"
-       else
-         local url="$2"
-         [[ $endpoint != *http* ]] && url="$1$2"
+                      -d "model=$3"  -fsL "$1$2" \
+                      "$verbose")" ;} ;;
+    3) [[ $research ]] && {
          html="$(curl -A "$agent" --max-time "${sec-5}" \
-                      -fsL "$url" "$verbose")"
-       fi ;;
+                      -fsL "$1$2$3&search-phones" \
+                      "$verbose")" ;} ;;
   esac
+  [[ -z $html ]] && { local url="$2"
+    [[ $endpoint != *http* ]] && url="$1$2"
+    html="$(curl -A "$agent" --max-time "${sec-5}" \
+                 -fsL "$url" "$verbose")" ;}
 }
 
 run() {
@@ -390,6 +458,8 @@ run() {
        agent="Googlebot/2.1 (+http://www.google.com/bot.html)" ;;
     2) database="https://phonesdata.com/en/"
        agent="AppleWebKit/537.36 (KHTML, like Gecko)" ;;
+    3) database="https://www.phonearena.com/"
+       agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64)" ;;
   esac
   get_html "$database" "$endpoint" "$research"
   declare -a devices links specs output
@@ -397,9 +467,10 @@ run() {
 
   # Brands.
   [[ $request = 'brands' ]] && {
-    (( db == 1 )) && gsmarena_request "brands" &&
-      request="search"
-    (( db == 2 )) && phonesdata_request "brands" &&
+    (( db == 1 )) && gsmarena_request "brands"
+    (( db == 2 )) && phonesdata_request "brands"
+    (( db == 3 )) && phonearena_request "brands"
+    request="search" && (( db > 1 )) &&
       request="devices_from_brand"
     [[ -z ${devices[0]} ]] && exit 1
     select_device "${devices[@]}" 
@@ -409,6 +480,7 @@ run() {
   html="${html//<br>/ }"
   (( db == 1 )) && gsmarena_request "$request"
   (( db == 2 )) && phonesdata_request "$request"
+  (( db == 3 )) && phonearena_request "$request"
   [[ -z ${devices[0]} ]] && exit 1
   select_device "${devices[@]}"
 
@@ -417,6 +489,7 @@ run() {
   [[ -z $specs_only && -z $raw ]] && terminfo && style
   (( db == 1 )) && gsmarena_specs
   (( db == 2 )) && phonesdata_specs
+  (( db == 3 )) && phonearena_specs
   store_specs "${specs[@]}"
   [[ -z ${output[0]} ]] && exit 1
   printf '\n'
@@ -439,6 +512,7 @@ main() {
       -B=$d*|--background=$d*) x=("${x[@]/$o}") && bg="${o#*=}" ;;
       -ga|--gsmarena)          x=("${x[@]/$o}") && db=1 ;;
       -pd|--phonesdata)        x=("${x[@]/$o}") && db=2 ;;
+      -pa|--phonearena)        x=("${x[@]/$o}") && db=3 ;;
       -so|--specs-only)        x=("${x[@]/$o}") && specs_only=1 ;;
       -v|--verbose)            x=("${x[@]/$o}") && verbose="-v" ;;
       -HL|--hl-only)           x=("${x[@]/$o}") && hl_only=1 ;;
@@ -455,22 +529,29 @@ main() {
           exit 1 ;;
     esac
   done
-  db="${db-1}" # Default databse GSMArena.
+  db="${db-1}" # Default database GSMArena.
   case "$1" in
     -h|--help)         printf '%s\n' "${man[@]}" && exit 0 ;;
     -V|--version)      printf '%s\n' "${info[@]}" && exit 0 ;;
-    -l|--latest)       request="latest" ;;
+    -l|--latest)       request="latest"
+      (( db == 3 )) && endpoint="phones/sort/date" ;;
     -t|--top-by-fans)  request="topbyfans"
-      (( db == 1 )) && endpoint="results.php3" ;;
+      (( db == 1 )) && endpoint="results.php3"
+      (( db == 3 )) && endpoint="phones/sort/rating" ;;
     -b|--brands)       request="brands"
       (( db == 1 )) && endpoint="makers.php3"
-      (( db == 2 )) && endpoint="smartphones" ;;
+      (( db == 2 )) && endpoint="smartphones"
+      (( db == 3 )) && endpoint="phones/manufacturers" ;;
     -c|--coming-soon)  request="comingsoon"
       (( db == 1 )) && endpoint="results.php3?sAvailabilities=2"
-      (( db == 2 )) && endpoint="comingsoon" ;;
+      (( db == 2 )) && endpoint="comingsoon"
+      (( db == 3 )) && printf '%s\n' \
+        "${0##*/}: no \"coming-soon\" devices on PhoneArena" &&
+          exit 1 ;;
     -s|--search|-f|--first)
       (( db == 1 )) && endpoint="res.php3?sSearch="
       (( db == 2 )) && endpoint="search/smartphone/"
+      (( db == 3 )) && endpoint="search?term="
       : "$(clean_string "${x[*]/$1}")"
       research="${_// /%20}"
       request="search"
