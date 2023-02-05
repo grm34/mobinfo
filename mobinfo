@@ -233,9 +233,11 @@ check_filters() {
 }
 
 store_specs() {
+  # Manages the specifications to be displayed.
+  # Return the formated output array to be printed.
   local entry key text
   for entry in "$@"; do
-    # Remove special chatacters for ALNUM output..
+    # Remove special chatacters for ALNUM output.
     [[ $alnum ]] && entry="${entry//[^[:alnum:][:blank:]>]}"
     # Split into keyword/description.
     key="$(clean_string "${entry%%>*}")"
