@@ -205,19 +205,22 @@ header() {
 row() {
   # Format specification text as a row of the table.
   # Cut and justify on several rows if necessary.
-  # Usage: row "keyword" "text" "text_length"
-  local lines=0 column=$((col2 + 1)) i index=0 key="$1"
-  (( $3 > column )) && lines=$(($3 / col2))
-  for ((i=0; i<=lines; i++)) {
-    (( i != 0 )) && unset key
-    local rowtext="${2:$index:$column}" spaces
-    [[ -z $rowtext ]] && continue
-    spaces="$(printf '%*s' $((column - ${#rowtext})) '')"
+  local key="$1" column=$((col2 + 1)) word words line lines
+  readarray -t -d " " words < <(printf '%s' "$2")
+  for word in "${words[@]}"; do
+    if (( (${#line} + ${#word}) < column )); then line+="$word " 
+    else lines+=("$line") && line= && line+="$word "
+    fi
+    [[ $word = "${words[-1]}" && $line ]] && lines+=("$line")
+  done
+  for line in "${lines[@]}"; do
+    [[ $line != "${lines[0]}" ]] && unset key
+    spaces="$(printf '%*s' $((column - ${#line})) '')"
     output+=("$(printf '%s%b %-*s %b%s%b %s%s %b%s' \
                        "$asc1" "$row1c" "$col1" "$key" "$rmc" \
-                       "$asc1" "$row2c" "$rowtext" "$spaces" \
+                       "$asc1" "$row2c" "$line" "$spaces" \
                        "$rmc" "$asc1")")
-    index=$((index + column)) ;}
+  done
 }
 
 check_filters() {
@@ -232,11 +235,11 @@ check_filters() {
 store_specs() {
   local entry key text
   for entry in "$@"; do
-    # Properly clean input string.
-    entry="$(clean_string "$entry")"
+    # Remove special chatacters for ALNUM output..
     [[ $alnum ]] && entry="${entry//[^[:alnum:][:blank:]>]}"
     # Split into keyword/description.
-    key="${entry%%>*}" && text="${entry#*>}"
+    key="$(clean_string "${entry%%>*}")"
+    text="$(clean_string "${entry#*>}")"
     # Define keyword column length for RAW output.
     [[ $raw ]] && { (( db == 1 )) && col1=18
       (( db == 2 )) && col1=23; (( db == 3 )) && col1=30 ;}
@@ -252,7 +255,7 @@ store_specs() {
     [[ $text && $raw ]] &&
       output+=("$(printf '%-*s %s' "$col1" "${key^^}" "$text")")
     [[ $text && -z $specs_only && -z $raw ]] &&
-      row "${key^}" "$text" "${#text}"
+      row "${key^}" "$text"
   done
   unset specs && return 0
 }
