@@ -10,7 +10,7 @@
     <img  alt="license" src="https://img.shields.io/badge/license-GPLv3.0-blue.svg">
   </a>
   <a href="https://github.com/grm34/mobinfo/releases">
-    <img  alt="release" src="https://img.shields.io/badge/release-0.1.1-blue.svg">
+    <img  alt="release" src="https://img.shields.io/badge/release-0.1.2-blue.svg">
   </a>
   <a href="https://github.com/grm34/mobinfo/actions/workflows/mobinfo.yml">
     <img  alt="updater" src="https://github.com/grm34/mobinfo/actions/workflows/mobinfo.yml/badge.svg">
