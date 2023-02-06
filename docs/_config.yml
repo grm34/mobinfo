@@ -1,5 +1,5 @@
 title: mobinfo
-tagline: A command-line tool that offers mobile phone information.
+tagline: Quickly get detailled technical characteristics and specifications of any smartphone directly from your favorite terminal.
 description: A command-line tool written in Bash 4.2+ that offers comprehensive and up-to-date mobile phone information from various online websites.
 url: https://grm34.github.io/mobinfo
 author:
