@@ -25,7 +25,7 @@ uninstall:
 	@echo Successfully uninstalled mobinfo.
 
 update:
-	@git pull --depth 1
+	@git pull
 	@cp -p docs/mobinfo.1 $(manpage)
 	@cp -p mobinfo $(mobinfo)
 	@chmod 755 $(mobinfo)
