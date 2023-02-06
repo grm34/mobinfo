@@ -44,7 +44,7 @@ directly from your favorite terminal.
 git clone --depth 1 https://github.com/grm34/mobinfo ~/.mobinfo
 ```
 
-* Intall it with make
+* Install it with make
 
 ```bash
 # Install
@@ -64,7 +64,8 @@ rm -rf ~/.mobinfo
 * Or run it directly from a function or an alias
 
 ```bash
-# Edit ~/.bashrc or whatever shell startup file.
+# Add one of the following lines to your ~/.bashrc or
+# whatever shell startup file and reload your terminal.
 
 # Alias
 alias mobinfo="bash ~/.mobinfo/mobinfo"
