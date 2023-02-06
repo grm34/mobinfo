@@ -250,8 +250,8 @@ store_specs() {
     [[ $raw ]] && { (( db == 1 )) && col1=18
       (( db == 2 )) && col1=23; (( db == 3 )) && col1=30 ;}
     # Ignore spec according to size and filters and options.
-    [[ -z $specs_only ]] &&
-      [[ ${#key} -ge $col1 || $text = [0-9] ]] && continue
+    [[ -z $specs_only ]] && [[ ${#key} -ge $col1
+      || $text = [0-9] || $text = '-' ]] && continue
     [[ $hl_only && ${key^^} != *-HL* ]] && continue
     [[ -z $hl && -z $hl_only && ${key^^} = *-HL* ]] && continue
     [[ $flt ]] && ! check_filters "${key,,}" && continue
