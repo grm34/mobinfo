@@ -128,8 +128,9 @@ style() {
   asc3="+"                      # Angle symbol.
 
   # Colorize only if the terminal allows it.
-  [[ ${ansi-0} -ge 8 ]] && {
-    local b=(0 0 0 0 0 0 0) f=(2 2 0 0 0 4 8)
+  [[ ${ansi:-0} -ge 8 ]] && {
+    local b=(0 0 0 0 0 0 0) f=(2 2 0 0 0 4 7)
+    local bold='\e[1m' bc='4' fc='3'
     (( ansi >= 256 )) && {
       case ${thm-dark} in
         dark)    b=(234 234 233 233 233 234 233)
@@ -139,16 +140,18 @@ style() {
         hack)    b=(234 234 233 233 233 234 10)
                  f=(3 3 233 233 233 2 232) ;;
       esac
+      bc='48;5;' && fc='38;5;'
       [[ $bg ]] && check_colors "$bg" && b=("${colors[@]}")
       [[ $fg ]] && check_colors "$fg" && f=("${colors[@]}") ;}
-    rmc="$(tput sgr0)"
-    th1c="$rmc$(tput setab "${b[0]}" setaf "${f[0]}" bold)"
-    th2c="$rmc$(tput setab "${b[1]}" setaf "${f[1]}" bold)"
-    asc1="$rmc$(tput setab "${b[2]}" setaf "${f[2]}")$asc1$rmc"
-    asc2="$rmc$(tput setab "${b[3]}" setaf "${f[3]}")$asc2$rmc"
-    asc3="$rmc$(tput setab "${b[4]}" setaf "${f[4]}")$asc3$rmc"
-    row1c="$rmc$(tput setab "${b[5]}" setaf "${f[5]}")"
-    row2c="$rmc$(tput setab "${b[6]}" setaf "${f[6]}")" ;}
+    rmc="$(printf '\e[0m')"
+    color() { printf '\e[0m\e[%sm\e[%sm%s%b' "$@" ;}
+    th1c="$(color "$bc${b[0]}" "$fc${f[0]}" "$bold")"
+    th2c="$(color "$bc${b[1]}" "$fc${f[1]}" "$bold")"
+    asc1="$(color "$bc${b[2]}" "$fc${f[2]}" "$asc1" "$rmc")"
+    asc2="$(color "$bc${b[3]}" "$fc${f[3]}" "$asc2" "$rmc")"
+    asc3="$(color "$bc${b[4]}" "$fc${f[4]}" "$asc3" "$rmc")"
+    row1c="$(color "$bc${b[5]}" "$fc${f[5]}")"
+    row2c="$(color "$bc${b[6]}" "$fc${f[6]}")" ;}
   return 0
 }
 
@@ -165,16 +168,17 @@ check_colors() {
 
 terminfo() {
   # Get size in cells to define table width.
-  shopt -s checkwinsize; (:;:)
-  [[ -z $COLUMNS ]] && : "$(stty size)" && COLUMNS="${_##* }"
-  [[ -z $COLUMNS ]] && COLUMNS="$(tput cols)"
+  shopt -s checkwinsize; (:;:); [[ -z $COLUMNS ]] &&
+    : "$(stty size 2>/dev/null)" && COLUMNS="${_##* }"
+  [[ -z $COLUMNS ]] && COLUMNS="$(tput cols 2>/dev/null)" 
+  COLUMNS="${COLUMNS:-76}"
   # Return table columns and max-width.
   max=120 && (( max >= COLUMNS )) && max=$((COLUMNS - 4))
   col1=18 && (( db == 2 )) && col1=23; (( db == 3 )) && col1=30
   col2=$((max - col1 - 7))
   # Get number of colors supported by the terminal.
-  [[ -t 1 && -z $ansi ]] &&
-    type -p tput &>/dev/null && ansi="$(tput colors)"
+  [[ -t 1 && -z $ansi ]] && { ansi="${TERM//[^[:digit:]]}"
+    [[ -z $ansi ]] && ansi="$(tput colors 2>/dev/null)" ;}
   return 0
 }
 
