@@ -30,7 +30,7 @@ LC_ALL=C.UTF-8
 LANG=C.UTF-8
 
 readarray -t info < <(printf '%s' \
-"mobinfo 0.1.2 ($MACHTYPE)
+"mobinfo 0.1.3 ($MACHTYPE)
 
 Copyright (c) 2022-2023 darkmaster @grm34.
 This program comes with ABSOLUTELY NO WARRANTY.
