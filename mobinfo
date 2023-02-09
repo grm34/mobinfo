@@ -237,8 +237,8 @@ check_filters() {
 }
 
 store_specs() {
-  # Manages the specifications to be displayed.
-  # Return the formated output array to be printed.
+  # Manage the specifications to be displayed.
+  # Return formated output array to be printed.
   local entry key text
   for entry in "$@"; do
     # Remove special chatacters for ALNUM output.
@@ -269,7 +269,7 @@ store_specs() {
 select_device() {
   # Display a selection form for search results.
   # Return the endpoint of the selected device/brand.
-  [[ ${#devices[@]} != 1 && -z $auto ]] && {
+  [[ -z $auto ]] && {
     local d && printf '\n'
     select d in "$@"; do [[ $d ]] && break; done
     local index=$((REPLY - 1)) ;}
