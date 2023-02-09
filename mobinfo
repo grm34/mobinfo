@@ -527,7 +527,7 @@ main() {
       -bc|--basic-color)       x=("${x[@]/$o}") && ansi=8 ;;
       -N|--alnum)              x=("${x[@]/$o}") && alnum=1 ;;
       -x|--log)                x=("${x[@]/$o}") && auto=1 &&
-        verbose="-v" && set -x &&
+        [[ $o != $1 ]] && verbose="-v" && set -x &&
           : "${info[0]} [${BASH_VERSION%%-*}] $0 $*" >&2 ;;
       [[:punct:]]*) [[ $o != "$1" ]] &&
         printf '%s\n' "${0##*/}: illegal option \"$o\"" &&
