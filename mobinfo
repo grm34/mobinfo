@@ -51,8 +51,8 @@ https://github.com/grm34/mobinfo/blob/main/LICENSE
 
 Written by darkmaster @grm34 (Jeremy Pardo)."
 
-printf -v man '%s' "\
-Usage: mobinfo [OPTIONS]... <arguments>... [FILTERS]...
+printf -v man '%s' \
+"Usage: mobinfo [OPTIONS]... <arguments>... [FILTERS]...
 
 A command-line tool written in Bash 4.2+ that offers comprehensive
 and up-to-date mobile phone information from various online websites.
