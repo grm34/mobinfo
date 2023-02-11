@@ -36,7 +36,7 @@ set -e
 LC_ALL=C.UTF-8
 LANG=C.UTF-8
 
-readarray -t info < <(printf '%s' \
+printf -v info '%s' \
 "mobinfo 0.1.3 ($MACHTYPE)
 
 Copyright (c) 2023 darkmaster @grm34 (Jeremy Pardo).
@@ -49,9 +49,9 @@ TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 https://github.com/grm34/mobinfo/blob/main/LICENSE
 
-Written by darkmaster @grm34 (Jeremy Pardo).")
+Written by darkmaster @grm34 (Jeremy Pardo)."
 
-readarray -t man < <(printf '%s' "\
+printf -v man '%s' "\
 Usage: mobinfo [OPTIONS]... <arguments>... [FILTERS]...
 
 A command-line tool written in Bash 4.2+ that offers comprehensive
@@ -127,7 +127,7 @@ COMPARE:
   mobinfo --first iphone XR && mobinfo --first iphone XS
   mobinfo -f A51 --filter=cpu && mobinfo -f A52 --filter=cpu
 
-Report bugs to https://github.com/grm34/mobinfo/issues")
+Report bugs to https://github.com/grm34/mobinfo/issues"
 
 style() {
   # This function is only used to quickly change the
@@ -154,7 +154,7 @@ style() {
       bc='48;5;' && fc='38;5;'
       [[ $bg ]] && check_colors "$bg" && b=("${colors[@]}")
       [[ $fg ]] && check_colors "$fg" && f=("${colors[@]}") ;}
-    rmc="$(printf '\e[0m')"
+    printf -v rmc '\e[0m'
     color() { printf '\e[0m\e[%sm\e[%sm%s%b' "$@" ;}
     th1c="$(color "$bc${b[0]}" "$fc${f[0]}" "$bold")"
     th2c="$(color "$bc${b[1]}" "$fc${f[1]}" "$bold")"
@@ -516,7 +516,7 @@ run() {
 }
 
 main() {
-  [[ $# -eq 0 ]] && printf '%s\n' "${man[@]}" && exit 1
+  [[ $# -eq 0 ]] && printf '%s\n' "$man" && exit 1
   local o x=("$@") w="[[:alpha:]]" d="[[:digit:]]"
   for o in "${x[@]}"; do
     case "$o" in
@@ -547,8 +547,8 @@ main() {
   done
   db="${db-1}" # Default database GSMArena.
   case "$1" in
-    -h|--help)         printf '%s\n' "${man[@]}" && exit 0 ;;
-    -V|--version)      printf '%s\n' "${info[@]}" && exit 0 ;;
+    -h|--help)         printf '%s\n' "$man" && exit 0 ;;
+    -V|--version)      printf '%s\n' "$info" && exit 0 ;;
     -l|--latest)       request="latest"
       (( db == 3 )) && endpoint="phones/sort/date" ;;
     -t|--top-by-fans)  request="topbyfans"
