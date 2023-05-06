@@ -66,9 +66,9 @@ GLOBAL:
   -t, --top-by-fans              Search most popular devices.
 
 DATABASE:
-  -ga, --gsmarena                Search on GSMArena (default).
-  -pd, --phonesdata              Search on PhonesData (more results).
-  -pa, --phonearena              Search on PhoneArena (slower).
+  -ga, --gsmarena                Search on GSMArena.
+  -pd, --phonesdata              Search on PhonesData (default).
+  -pa, --phonearena              Search on PhoneArena.
 
 FILTERING:
   -so, --specs-only              Show specifications only.
@@ -452,7 +452,7 @@ get_html() {
   # Call curl to retrieve html content as a string.
   case $db in
     1) html="$(curl -A "$agent" --max-time "${sec-5}" \
-                    -fsL "$1$2$3" "$verbose")" ;;
+                    -fsL "$1$2$3&tn=yfwwyAWDZqqtZLp5p79QGQ%253D%253D" "$verbose")" ;;
     2) [[ $research ]] && {
          html="$(curl -A "$agent" --max-time "${sec-5}" \
                       -d "model=$3"  -fsL "$1$2" \
@@ -545,7 +545,7 @@ main() {
           exit 1 ;;
     esac
   done
-  db="${db-3}" # Default database GSMArena.
+  db="${db-2}" # Default database GSMArena.
   case "$1" in
     -h|--help)         printf '%s\n' "$man" && exit 0 ;;
     -V|--version)      printf '%s\n' "$info" && exit 0 ;;
