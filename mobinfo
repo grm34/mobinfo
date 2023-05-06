@@ -172,7 +172,7 @@ check_colors() {
   (( ${#colors[@]} == 7 )) && local n && {
     for n in "${colors[@]}"; do
       if [[ $n =~ ^[0-9]+$ ]] && (( n <= 256 )); then continue
-      else return 1 && break
+      else break && return 1
       fi
     done ;}
 }
@@ -545,7 +545,7 @@ main() {
           exit 1 ;;
     esac
   done
-  db="${db-3}" # Default database GSMArena.
+  db="${db-3}" # Default database: PhoneArena.
   case "$1" in
     -h|--help)         printf '%s\n' "$man" && exit 0 ;;
     -V|--version)      printf '%s\n' "$info" && exit 0 ;;
