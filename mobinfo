@@ -545,7 +545,7 @@ main() {
           exit 1 ;;
     esac
   done
-  db="${db-1}" # Default database GSMArena.
+  db="${db-3}" # Default database GSMArena.
   case "$1" in
     -h|--help)         printf '%s\n' "$man" && exit 0 ;;
     -V|--version)      printf '%s\n' "$info" && exit 0 ;;
