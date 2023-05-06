@@ -29,7 +29,7 @@ directly from your favorite terminal.
 ```
 
 <p align="center">
-  <a href="#">
+  <a href="https://raw.githubusercontent.com/grm34/mobinfo/main/docs/assets/images/mobinfo.gif">
     <img width="48%" alt="demo" src="https://raw.githubusercontent.com/grm34/mobinfo/main/docs/assets/images/mobinfo.gif">
   </a>
 </p>
@@ -163,14 +163,14 @@ Report bugs to https://github.com/grm34/mobinfo/issues
   Screenshots
 </h2>
 
-<a href="#">
+<a href="https://raw.githubusercontent.com/grm34/mobinfo/main/docs/assets/images/mobinfo_hack.png">
   <img align="center" width="48%" alt="mobinfo_dark" src="https://raw.githubusercontent.com/grm34/mobinfo/main/docs/assets/images/mobinfo_hack.png">
 </a>
 
-<a href="#">
+<a href="https://raw.githubusercontent.com/grm34/mobinfo/main/docs/assets/images/mobinfo_light.png">
   <img align="center" width="48%" alt="mobinfo_light" src="https://raw.githubusercontent.com/grm34/mobinfo/main/docs/assets/images/mobinfo_light.png">
 </a>
 
-<a href="#">
+<a href="https://raw.githubusercontent.com/grm34/mobinfo/main/docs/assets/images/mobinfo_dark.png">
   <img align="center" width="48%" alt="mobinfo_hack" src="https://raw.githubusercontent.com/grm34/mobinfo/main/docs/assets/images/mobinfo_dark.png">
 </a>
