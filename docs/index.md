@@ -30,7 +30,7 @@ directly from your favorite terminal.
 
 <p align="center">
   <a href="#">
-    <img  alt="demo" src="https://raw.githubusercontent.com/grm34/mobinfo/main/docs/assets/images/mobinfo.gif">
+    <img width="48%" alt="demo" src="https://raw.githubusercontent.com/grm34/mobinfo/main/docs/assets/images/mobinfo.gif">
   </a>
 </p>
 
@@ -163,20 +163,14 @@ Report bugs to https://github.com/grm34/mobinfo/issues
   Screenshots
 </h2>
 
-<p align="center">
-  <a href="#">
-    <img  alt="mobinfo_dark" src="https://raw.githubusercontent.com/grm34/mobinfo/main/docs/assets/images/mobinfo_dark.png">
-  </a>
-</p>
+<a href="#">
+  <img align="center" width="48%" alt="mobinfo_dark" src="https://raw.githubusercontent.com/grm34/mobinfo/main/docs/assets/images/mobinfo_hack.png">
+</a>
 
-<p align="center">
-  <a href="#">
-    <img  alt="mobinfo_light" src="https://raw.githubusercontent.com/grm34/mobinfo/main/docs/assets/images/mobinfo_light.png">
-  </a>
-</p>
+<a href="#">
+  <img align="center" width="48%" alt="mobinfo_light" src="https://raw.githubusercontent.com/grm34/mobinfo/main/docs/assets/images/mobinfo_light.png">
+</a>
 
-<p align="center">
-  <a href="#">
-    <img  alt="mobinfo_hack" src="https://raw.githubusercontent.com/grm34/mobinfo/main/docs/assets/images/mobinfo_hack.png">
-  </a>
-</p>
+<a href="#">
+  <img align="center" width="48%" alt="mobinfo_hack" src="https://raw.githubusercontent.com/grm34/mobinfo/main/docs/assets/images/mobinfo_dark.png">
+</a>
