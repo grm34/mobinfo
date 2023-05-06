@@ -93,9 +93,9 @@ GLOBAL:
   -t, --top-by-fans              Search most popular devices.
 
 DATABASE:
-  -ga, --gsmarena                Search on GSMArena (default).
-  -pd, --phonesdata              Search on PhonesData (more results).
-  -pa, --phonearena              Search on PhoneArena (slower).
+  -ga, --gsmarena                Search on GSMArena.
+  -pd, --phonesdata              Search on PhonesData (default).
+  -pa, --phonearena              Search on PhoneArena.
 
 FILTERING:
   -so, --specs-only              Show specifications only.
