@@ -25,6 +25,7 @@
 # TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 # SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
+
 [[ ${BASH_SOURCE[0]} != "$0" ]] && return 1
 
 (( BASH_VERSINFO < 4 )) && printf '%s %s\n' \
@@ -36,8 +37,9 @@ set -e
 LC_ALL=C.UTF-8
 LANG=C.UTF-8
 
+
 printf -v info '%s' \
-"mobinfo 0.1.4 ($MACHTYPE)
+"mobinfo 0.1.5 ($MACHTYPE)
 
 Copyright (c) 2023 darkmaster @grm34 (Jeremy Pardo).
 THE SOFTWARE IS PROVIDED \"AS IS\", WITHOUT WARRANTY OF ANY KIND,
@@ -50,6 +52,7 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 https://github.com/grm34/mobinfo/blob/main/LICENSE
 
 Written by darkmaster @grm34 (Jeremy Pardo)."
+
 
 printf -v man '%s' \
 "Usage: mobinfo [OPTIONS]... <arguments>... [FILTERS]...
@@ -75,9 +78,10 @@ FILTERING:
   -hl, --highlight               Show highlighted specifications.
   -HL, --hl-only                 Show highlighted specs only.
 
-     Highlighted specifications are used only by GSMArena.
+     Highlighted specifications only available on GSMArena.
 
-  -F=<filter>, --filter=<filter1,filter2>
+  -F, --filter  <filter1,filter2>
+
      os, chipset, cpu, gpu, models, modelname, nettech, net2g, net3g,
      net4g, speed, wlan, bluetooth, gps, sim, nfc, radio, usb, colors,
      price, sendors, memoryslot, internalmemory, memoryother, year,
@@ -93,16 +97,17 @@ RENDERING:
   -R,  --raw                     Disable specifications rendering.
   -nc, --no-color                Disable ANSI colors rendering.
   -bc, --basic-color             Basic colors instead of 256-colors.
-  -T=, --theme=light             Change 256-colors theme.
+  -T, --theme  <name>            Change 256-colors theme.
                                  light - dark (default) - hack
-  -C=, --foreground=             Change foreground colors.
-  -B=, --background=             Change background colors.
+  -C, --foreground  <colors>     Change foreground colors.
+  -B, --background  <colors>     Change background colors.
 
      The table is divided into seven blocks and it is possible to
      change the color of each of them. In order the blocks are:
      head1 - head2 - Vsymbol - Hsymbol - Asymbol - row1 - row2
-     Dark theme (default):  --foreground=2,2,233,233,233,140,8
-                            --background=234,234,233,233,233,234,233
+
+     Dark theme (default):  --foreground 2,2,233,233,233,140,8
+                            --background 234,234,233,233,233,234,233
 
 OTHER:
   -h, --help                     Get help for commands.
@@ -110,7 +115,7 @@ OTHER:
   -v, --verbose                  Make curl operations more talkative.
                                  Useful for debugging and seeing
                                  what is going on under the hood.
-  -m=<sec>, --max-time=<sec>     Maximum time in seconds that you
+  -m, --max-time  <seconds>      Maximum time in seconds that you
                                  allow curl operations to take.
                                  Useful for preventing slow networks
                                  or database going down (default 5).
@@ -119,19 +124,21 @@ OTHER:
 
 EXAMPLES:
   mobinfo --search samsung
-  mobinfo -s xiaomi mi 11 --filter=name,os,cpu,gpu,memory
-  mobinfo -f A51 5G UW --filter=status,price --specs-only
-  mobinfo --brands --filter=name,os,cam,bat --theme=hack
+  mobinfo -s xiaomi mi 11 --filter processor,os,ram,gpu
+  mobinfo -f A51 5G UW --filter model,price --specs-only
+  mobinfo --brands --filter network,speed --theme hack
 
 COMPARE:
   mobinfo --first iphone XR && mobinfo --first iphone XS
-  mobinfo -f A51 --filter=cpu && mobinfo -f A52 --filter=cpu
+  mobinfo -f A51 --filter processor && mobinfo -f A52 --filter processor
 
 Report bugs to https://github.com/grm34/mobinfo/issues"
+
 
 style() {
   # This function is only used to quickly change the
   # layout and colors of the specification table.
+  
   th1="Keyword"                 # Left header title.
   th2="Specifications"          # Right header title.
   asc1="|"                      # Vertical symbol.
@@ -166,16 +173,20 @@ style() {
   return 0
 }
 
+
 check_colors() {
   # Verify that the requested color combination is valid.
   readarray -t -d "," colors < <(printf '%s' "$1")
   (( ${#colors[@]} == 7 )) && local n && {
     for n in "${colors[@]}"; do
-      if [[ $n =~ ^[0-9]+$ ]] && (( n <= 256 )); then continue
-      else break && return 1
+      if [[ $n =~ ^[0-9]+$ ]] && (( n <= 256 )); then
+        continue
+      else
+        break && return 1
       fi
     done ;}
 }
+
 
 terminfo() {
   # Get size in cells to define table width.
@@ -183,25 +194,30 @@ terminfo() {
     : "$(stty size 2>/dev/null)" && COLUMNS="${_##* }"
   [[ -z $COLUMNS ]] && COLUMNS="$(tput cols 2>/dev/null)" 
   COLUMNS="${COLUMNS:-76}"
+
   # Return table columns and max-width.
   max=120 && (( max >= COLUMNS )) && max=$((COLUMNS - 4))
   col1=18 && (( db == 2 )) && col1=23; (( db == 3 )) && col1=30
   col2=$((max - col1 - 7))
+
   # Get number of colors supported by the terminal.
   [[ -t 1 && -z $ansi ]] && { ansi="${TERM//[^[:digit:]]}"
     [[ -z $ansi ]] && ansi="$(tput colors 2>/dev/null)" ;}
   return 0
 }
 
+
 clean_string() {
   # Replace unwanted html characters.
   : "${1//&amp;/\&}" && : "${_//[[:space:]]&nbsp;}"
+
   # Trim leading and trailing white-space.
   # Credits: @dylanaraps (thanks).
   : "${_#"${_%%[![:space:]]*}"}"
   : "${_%"${_##*[![:space:]]}"}"
   printf '%s' "$_"
 }
+
 
 header() {
   # Display table header or footer.
@@ -216,6 +232,7 @@ header() {
            "$asc3" "$cel1" "$asc3" "$cel2" "$asc3" ;}
   return 0
 }
+
 
 row() {
   # Format specification text as a row of the table.
@@ -238,6 +255,7 @@ row() {
   done
 }
 
+
 check_filters() {
   # Verify that each requested filter is found in keyword.
   local f filters
@@ -247,6 +265,7 @@ check_filters() {
   done
 }
 
+
 store_specs() {
   # Manage the specifications to be displayed.
   # Return formated output array to be printed.
@@ -254,18 +273,22 @@ store_specs() {
   for entry in "$@"; do
     # Remove special chatacters for ALNUM output.
     [[ $alnum ]] && entry="${entry//[^[:alnum:][:blank:]>]}"
+    
     # Split into keyword/description.
     key="$(clean_string "${entry%%>*}")"
     text="$(clean_string "${entry#*>}")"
+
     # Define keyword column length for RAW output.
     [[ $raw ]] && { (( db == 1 )) && col1=18
       (( db == 2 )) && col1=23; (( db == 3 )) && col1=30 ;}
+
     # Ignore spec according to size and filters and options.
     [[ -z $specs_only ]] && [[ ${#key} -ge $col1
       || $text = [0-9] || $text = '-' ]] && continue
     [[ $hl_only && ${key^^} != *-HL* ]] && continue
     [[ -z $hl && -z $hl_only && ${key^^} = *-HL* ]] && continue
     [[ $flt ]] && ! check_filters "${key,,}" && continue
+
     # Increment dedicated array.
     [[ $text && $specs_only ]] &&
       output+=("$text") && continue
@@ -276,6 +299,7 @@ store_specs() {
   done
   unset specs && return 0
 }
+
 
 select_device() {
   # Display a selection form for search results.
@@ -288,6 +312,7 @@ select_device() {
   unset devices links
 }
 
+
 get_devices() {
   # Most used way by mobinfo to get devices from an html string.
   # Alternatives are used below when the data to be
@@ -298,23 +323,28 @@ get_devices() {
     <(printf '%s' "$html" | grep "$1" | grep -oP "$3")
 }
 
+
 gsmarena_request() {
   # Manage the requests made to GSMArena to obtain devices.
   # Return devices names with links as arrays.
   case "$1" in
     brands)
       local r=('<br><span>' '(?<=php>).*?(?=<br>)' \
-               '(?<=href=).*?(?=>)') ;;
+               '(?<=href=).*?(?=>)')
+      ;;
     latest)
       local r=('<div style="overflow' '(?<="> ).*?(?=</a>)' \
-               '(?<=href=").*?(?=")') ;;
+               '(?<=href=").*?(?=")')
+      ;;
     search|comingsoon|topbyfans)
       local r=('<strong><span>' '(?<=<span>).*?(?=<)' \
-               '(?<=href=").*?(?=">)') ;;
+               '(?<=href=").*?(?=">)')
+      ;;
   esac
   get_devices "${r[@]}"
   unset html
 }
+
 
 phonesdata_request() {
   # Manage the requests made to PhonesData to obtain devices.
@@ -331,7 +361,8 @@ phonesdata_request() {
       for entry in "${data[@]}"; do
         links+=("$(clean_string "${entry%%/>*}")")
         devices+=("$(clean_string "${entry##*/>}")")
-      done ;;
+      done
+      ;;
     latest|topbyfans)
       local r=('Characteristics' '<h2>Popular smartphones</h2>' \
                '<h2>New models</h2>' '<h2>Most viewed</h2>')
@@ -349,7 +380,8 @@ phonesdata_request() {
           links+=("$(clean_string "${entry%%>*}")")
           : "${entry%% - "${r[0]}"*}"
           devices+=("$(clean_string "${_##*alt=\"}")") ;}
-      done ;;
+      done
+      ;;
     devices_from_brand)
       local r=('<div class=product-item' \
                '(?<= title=").*?(?= specs">)' \
@@ -359,6 +391,7 @@ phonesdata_request() {
   unset html
 }
 
+
 phonearena_request() {
   # Manage the requests made to PhoneArena to obtain devices.
   # Return devices names with links as arrays.
@@ -367,12 +400,14 @@ phonearena_request() {
       local r=('listing-item-hover' \
                '(?<=View all ).*?(?= cell phones)' \
                '(?<=href=").*?(?=")')
-      get_devices "${r[@]}" ;;
+      get_devices "${r[@]}"
+      ;;
     search)
       local r=(\
         's="title"><a href="https://www.phonearena.com/phones/' \
         '(?<=[0-9]">).*?(?=</a>)' '(?<=href=").*?(?=")')
-      get_devices "${r[@]}" ;;
+      get_devices "${r[@]}"
+      ;;
     devices_from_brand|latest|topbyfans)
       local r=('<a href="https://www.phonearena.com/phones/' \
                '(?>=").*?(?=" class)' '(?>=").*?(?=" target)')
@@ -389,10 +424,12 @@ phonearena_request() {
         : "${entry##*=\"}" && : "${_##*phones/}"
         : "${_%%\_id*}"
         devices+=("$(clean_string "${_//-/ }")")
-      done ;;
+      done
+      ;;
   esac
   unset html
 }
+
 
 gsmarena_specs() {
   # Get the specs from GSMArena as an array.
@@ -401,6 +438,7 @@ gsmarena_specs() {
   readarray -t specs < <(printf '%s' "${_//\"}")
   unset html
 }
+
 
 phonesdata_specs() {
   # Get the specs from PhonesData as an array.
@@ -419,6 +457,7 @@ phonesdata_specs() {
   unset html
 }
 
+
 phonearena_specs() {
   # Get the specs from PhoneArena as an array.
   # TODO: better way to get data that are split on several lines.
@@ -429,6 +468,7 @@ phonearena_specs() {
   readarray -t lines < <(printf '%s' "$html") && : "${lines[*]}"
   readarray -t data < <(printf '%s' "$_" | grep -oP "${r[0]}")
   for entry in "${data[@]}"; do
+
     # Get keyword.
     : "$(printf '%s' "$entry" | grep -m 1 -oP "${r[1]}")"
     [[ -z $_ || $_ = *Manual* || $_ = *'target="_blank"'* ]] &&
@@ -436,10 +476,12 @@ phonearena_specs() {
     [[ $_ = *'<strong>'* ]] &&
       : "$(printf '%s' "$_" | grep -m 1 -oP "${r[2]}")"
     key="${_//$'\n'/ }"
+
     # Get description.
     : "$(printf '%s' "$entry" | grep -m 1 -oP "${r[3]}")"
     [[ $_ && $_ != *tooltip* ]] &&
       : "${_//$'\n'}" && value="${_//    }"
+
     # Increment the dedicated array.
     [[ $key && $value = *[[:alnum:]]* &&
       ! ${specs[*]} =~ ${key//:} ]] &&
@@ -448,34 +490,45 @@ phonearena_specs() {
   unset html
 }
 
+
 get_html() {
   # Call curl to retrieve html content as a string.
+  # TODO: fix GSMArena (token required)
   case $db in
-    1) html="$(curl -A "$agent" --max-time "${sec-5}" \
-                    -fsL "$1$2$3&tn=yfwwyAWDZqqtZLp5p79QGQ%253D%253D" "$verbose")" ;;
-    2) [[ $research ]] && {
-         html="$(curl -A "$agent" --max-time "${sec-5}" \
-                      -d "model=$3"  -fsL "$1$2" \
-                      "$verbose")" ;} ;;
-    3) [[ $research ]] && {
-         html="$(curl -A "$agent" --max-time "${sec-5}" \
-                      -fsL "$1$2$3&search-phones" \
-                      "$verbose")" ;} ;;
+    1)
+      html="$(curl -A "$agent" --max-time "${sec-5}" \
+                   --data "$2$3" -fsL "$1" "$verbose")"
+      ;;
+    2)
+      [[ $research ]] && {
+        html="$(curl -A "$agent" --max-time "${sec-5}" \
+                     -d "model=$3"  -fsL "$1$2" "$verbose")" ;}
+      ;;
+    3)
+      [[ $research ]] && {
+        html="$(curl -A "$agent" --max-time "${sec-5}" \
+                     -fsL "$1$2$3&search-phones" "$verbose")" ;}
+      ;;
   esac
-  [[ -z $html ]] && { local url="$2"
+  [[ -z $html ]] && {
+    local url="$2"
     [[ $endpoint != *http* ]] && url="$1$2"
     html="$(curl -A "$agent" --max-time "${sec-5}" \
                  -fsL "$url" "$verbose")" ;}
 }
 
+
 run() {
   case $db in
     1) database="https://gsmarena.com/"
-       agent="Googlebot/2.1 (+http://www.google.com/bot.html)" ;;
+       agent="Googlebot/2.1 (+http://www.google.com/bot.html)"
+       ;;
     2) database="https://phonesdata.com/en/"
-       agent="AppleWebKit/537.36 (KHTML, like Gecko)" ;;
+       agent="AppleWebKit/537.36 (KHTML, like Gecko)"
+       ;;
     3) database="https://www.phonearena.com/"
-       agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64)" ;;
+       agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64)"
+       ;;
   esac
   get_html "$database" "$endpoint" "$research"
   declare -a devices links specs output
@@ -515,70 +568,85 @@ run() {
   unset output && return 0
 }
 
+
 main() {
   [[ $# -eq 0 ]] && printf '%s\n' "$man" && exit 1
-  local o x=("$@") w="[[:alpha:]]" d="[[:digit:]]"
-  for o in "${x[@]}"; do
-    case "$o" in
-      -f|--first)              auto=1 ;;
-      -F=$w*|--filter=$w*)     x=("${x[@]/$o}") && flt="${o#*=}" ;;
-      -m=$d*|--max-time=$d*)   x=("${x[@]/$o}") && sec="${o#*=}" ;;
-      -T=$w*|--theme=$w*)      x=("${x[@]/$o}") && thm="${o#*=}" ;;
-      -C=$d*|--foreground=$d*) x=("${x[@]/$o}") && fg="${o#*=}" ;;
-      -B=$d*|--background=$d*) x=("${x[@]/$o}") && bg="${o#*=}" ;;
-      -ga|--gsmarena)          x=("${x[@]/$o}") && db=1 ;;
-      -pd|--phonesdata)        x=("${x[@]/$o}") && db=2 ;;
-      -pa|--phonearena)        x=("${x[@]/$o}") && db=3 ;;
-      -so|--specs-only)        x=("${x[@]/$o}") && specs_only=1 ;;
-      -v|--verbose)            x=("${x[@]/$o}") && verbose="-v" ;;
-      -HL|--hl-only)           x=("${x[@]/$o}") && hl_only=1 ;;
-      -hl|--highlight)         x=("${x[@]/$o}") && hl=1 ;;
-      -R|--raw)                x=("${x[@]/$o}") && raw=1 ;;
-      -nc|--no-color)          x=("${x[@]/$o}") && ansi=0 ;;
-      -bc|--basic-color)       x=("${x[@]/$o}") && ansi=8 ;;
-      -N|--alnum)              x=("${x[@]/$o}") && alnum=1 ;;
-      -x|--log)                x=("${x[@]/$o}") && auto=1 &&
-        [[ $o != "$1" ]] && verbose="-v" && set -x &&
-          : "${info[0]} [${BASH_VERSION%%-*}] $0 $*" >&2 ;;
-      [[:punct:]]*) [[ $o != "$1" ]] &&
-        printf '%s\n' "${0##*/}: illegal option \"$o\"" &&
-          exit 1 ;;
+  while [[ $1 ]]; do
+    case "$1" in
+      -h|--help)         printf '%s\n' "$man"; exit 0 ;;
+      -V|--version)      printf '%s\n' "$info"; exit 0 ;;
+      -F|--filter)       shift; flt="$1";;
+      -m|--max-time)     shift; sec="$1";;
+      -T|--theme)        shift; thm="$1";;
+      -C|--foreground)   shift; fg="$1";;
+      -B|--background)   shift; bg="$1";;
+      -ga|--gsmarena)    db=1;;
+      -pd|--phonesdata)  db=2;;
+      -pa|--phonearena)  db=3;;
+      -so|--specs-only)  specs_only=1;;
+      -v|--verbose)      verbose="-v";;
+      -HL|--hl-only)     hl_only=1;;
+      -hl|--highlight)   hl=1;;
+      -R|--raw)          raw=1;;
+      -nc|--no-color)    ansi=0;;
+      -bc|--basic-color) ansi=8;;
+      -N|--alnum)        alnum=1;;
+      -x|--log)
+        auto=1
+        verbose="-v"
+        set -x
+        : "${info[0]} [${BASH_VERSION%%-*}] $0 ${*}" >&2
+        ;;
+          
+      -l|--latest)
+        request="latest"
+        (( db == 3 )) && endpoint="phones/sort/date"
+        ;;
+      -t|--top-by-fans)
+        request="topbyfans"
+        (( db == 1 )) && endpoint="results.php3"
+        (( db == 3 )) && endpoint="phones/sort/rating"
+        ;;
+      -b|--brands)
+        request="brands"
+        (( db == 1 )) && endpoint="makers.php3"
+        (( db == 2 )) && endpoint="smartphones"
+        (( db == 3 )) && endpoint="phones/manufacturers"
+        ;;
+      -c|--coming-soon)
+        request="comingsoon"
+        (( db == 1 )) && endpoint="results.php3?sAvailabilities=2"
+        (( db == 2 )) && endpoint="comingsoon"
+        (( db == 3 )) && {
+          printf '%s\n'"${0##*/}: no \"coming-soon\" devices on PhoneArena"
+          exit 1 ;}
+        ;;
+      -s|--search|-f|--first)
+        [[ $1 == "-f" || $1 == "first" ]] && auto=1
+        shift
+        db="${db-3}"
+        (( db == 1 )) && endpoint="id=topsearch-text&name=sSearch&value="
+        (( db == 2 )) && endpoint="search/smartphone/"
+        (( db == 3 )) && endpoint="search?term="
+        : "$*"
+        : "$(clean_string "${_%%-*}")"
+        research="${_// /%20}"
+        request="search"
+        [[ -z $research ]] && {
+          printf '%s\n' "${0##*/}: option \"$1\" requires an argument"
+          exit 1 ;}
+        ;;
+      [[:punct:]]*)
+        printf '%s\n' "${0##*/}: illegal option \"$1\""
+        exit 1
+        ;;    
     esac
+    shift
   done
-  db="${db-3}" # Default database: PhoneArena.
-  case "$1" in
-    -h|--help)         printf '%s\n' "$man" && exit 0 ;;
-    -V|--version)      printf '%s\n' "$info" && exit 0 ;;
-    -l|--latest)       request="latest"
-      (( db == 3 )) && endpoint="phones/sort/date" ;;
-    -t|--top-by-fans)  request="topbyfans"
-      (( db == 1 )) && endpoint="results.php3"
-      (( db == 3 )) && endpoint="phones/sort/rating" ;;
-    -b|--brands)       request="brands"
-      (( db == 1 )) && endpoint="makers.php3"
-      (( db == 2 )) && endpoint="smartphones"
-      (( db == 3 )) && endpoint="phones/manufacturers" ;;
-    -c|--coming-soon)  request="comingsoon"
-      (( db == 1 )) && endpoint="results.php3?sAvailabilities=2"
-      (( db == 2 )) && endpoint="comingsoon"
-      (( db == 3 )) && printf '%s\n' \
-        "${0##*/}: no \"coming-soon\" devices on PhoneArena" &&
-          exit 1 ;;
-    -s|--search|-f|--first)
-      (( db == 1 )) && endpoint="res.php3?sSearch="
-      (( db == 2 )) && endpoint="search/smartphone/"
-      (( db == 3 )) && endpoint="search?term="
-      : "$(clean_string "${x[*]/$1}")"
-      research="${_// /%20}"
-      request="search"
-      [[ -z $research ]] && printf '%s%s\n' "${0##*/}: " \
-        "option \"$1\" requires an argument" && exit 1 ;;
-    *) printf '%s\n' "${0##*/}: illegal option \"$1\""
-       exit 1 ;;
-  esac
   unset info man
   run && exit 0
 }
+
 
 main "$@"
 
