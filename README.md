@@ -102,9 +102,10 @@ FILTERING:
   -hl, --highlight               Show highlighted specifications.
   -HL, --hl-only                 Show highlighted specs only.
 
-     Highlighted specifications are used only by GSMArena.
+     Highlighted specifications only available on GSMArena.
 
-  -F=<filter>, --filter=<filter1,filter2>
+  -F, --filter  <filter1,filter2>
+
      os, chipset, cpu, gpu, models, modelname, nettech, net2g, net3g,
      net4g, speed, wlan, bluetooth, gps, sim, nfc, radio, usb, colors,
      price, sendors, memoryslot, internalmemory, memoryother, year,
@@ -120,16 +121,17 @@ RENDERING:
   -R,  --raw                     Disable specifications rendering.
   -nc, --no-color                Disable ANSI colors rendering.
   -bc, --basic-color             Basic colors instead of 256-colors.
-  -T=, --theme=light             Change 256-colors theme.
+  -T, --theme  <name>            Change 256-colors theme.
                                  light - dark (default) - hack
-  -C=, --foreground=             Change foreground colors.
-  -B=, --background=             Change background colors.
+  -C, --foreground  <colors>     Change foreground colors.
+  -B, --background  <colors>     Change background colors.
 
      The table is divided into seven blocks and it is possible to
      change the color of each of them. In order the blocks are:
      head1 - head2 - Vsymbol - Hsymbol - Asymbol - row1 - row2
-     Dark theme (default):  --foreground=2,2,233,233,233,140,8
-                            --background=234,234,233,233,233,234,233
+
+     Dark theme (default):  --foreground 2,2,233,233,233,140,8
+                            --background 234,234,233,233,233,234,233
 
 OTHER:
   -h, --help                     Get help for commands.
@@ -137,7 +139,7 @@ OTHER:
   -v, --verbose                  Make curl operations more talkative.
                                  Useful for debugging and seeing
                                  what is going on under the hood.
-  -m=<sec>, --max-time=<sec>     Maximum time in seconds that you
+  -m, --max-time  <seconds>      Maximum time in seconds that you
                                  allow curl operations to take.
                                  Useful for preventing slow networks
                                  or database going down (default 5).
@@ -146,13 +148,13 @@ OTHER:
 
 EXAMPLES:
   mobinfo --search samsung
-  mobinfo -s xiaomi mi 11 --filter=name,os,cpu,gpu,memory
-  mobinfo -f A51 5G UW --filter=status,price --specs-only
-  mobinfo --brands --filter=name,os,cam,bat --theme=hack
+  mobinfo -s xiaomi mi 11 --filter name,os,cpu,gpu,memory
+  mobinfo -f A51 5G UW --filter status,price --specs-only
+  mobinfo --brands --filter name,os,cam,bat --theme hack
 
 COMPARE:
   mobinfo --first iphone XR && mobinfo --first iphone XS
-  mobinfo -f A51 --filter=cpu && mobinfo -f A52 --filter=cpu
+  mobinfo -f A51 --filter cpu && mobinfo -f A52 --filter cpu
 
 Report bugs to https://github.com/grm34/mobinfo/issues
 ```
