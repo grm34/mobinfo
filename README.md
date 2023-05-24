@@ -30,7 +30,7 @@ directly from your favorite terminal.
 
 <p align="center">
   <a href="https://raw.githubusercontent.com/grm34/mobinfo/main/docs/assets/images/mobinfo.gif">
-    <img width="48%" alt="demo" src="https://raw.githubusercontent.com/grm34/mobinfo/main/docs/assets/images/mobinfo.gif">
+    <img width="70%" alt="demo" src="https://raw.githubusercontent.com/grm34/mobinfo/main/docs/assets/images/mobinfo.gif">
   </a>
 </p>
 
