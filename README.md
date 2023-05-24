@@ -1,7 +1,7 @@
 <!-- markdownlint-disable-file MD033 -->
 <h1 align="center">
   <a href="#">
-    <img alt="mobinfo" height="180px" src="https://raw.githubusercontent.com/grm34/mobinfo/main/docs/assets/images/mobinfo.png">
+    <img alt="mobinfo" height="160px" src="https://raw.githubusercontent.com/grm34/mobinfo/main/docs/assets/images/mobinfo.png">
   </a>
 </h1>
 
@@ -173,6 +173,3 @@ Report bugs to https://github.com/grm34/mobinfo/issues
   <img align="center" width="48%" alt="mobinfo_light" src="https://raw.githubusercontent.com/grm34/mobinfo/main/docs/assets/images/mobinfo_light.png">
 </a>
 
-<a href="https://raw.githubusercontent.com/grm34/mobinfo/main/docs/assets/images/mobinfo_dark.png">
-  <img align="center" width="48%" alt="mobinfo_hack" src="https://raw.githubusercontent.com/grm34/mobinfo/main/docs/assets/images/mobinfo_dark.png">
-</a>
