@@ -124,13 +124,13 @@ OTHER:
 
 EXAMPLES:
   mobinfo --search samsung
-  mobinfo -s xiaomi mi 11 --filter name,os,cpu,gpu,memory
-  mobinfo -f A51 5G UW --filter status,price --specs-only
-  mobinfo --brands --filter name,os,cam,bat --theme hack
+  mobinfo -s xiaomi mi 11 --filter processor,os,ram,gpu
+  mobinfo -f A51 5G UW --filter model,price --specs-only
+  mobinfo --brands --filter network,speed --theme hack
 
 COMPARE:
   mobinfo --first iphone XR && mobinfo --first iphone XS
-  mobinfo -f A51 --filter cpu && mobinfo -f A52 --filter cpu
+  mobinfo -f A51 --filter processor && mobinfo -f A52 --filter processor
 
 Report bugs to https://github.com/grm34/mobinfo/issues"
 
