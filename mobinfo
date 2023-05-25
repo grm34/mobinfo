@@ -26,20 +26,24 @@
 # SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 
+# Prevent sourcing.
 [[ ${BASH_SOURCE[0]} != "$0" ]] && return 1
 
+# Minimum bash version.
 (( BASH_VERSINFO < 4 )) && printf '%s %s\n' \
   "${0##*/}: Bash ${BASH_VERSION%%-*} not fully supported" \
   "(upgrade to a version higher than 4)" && exit 1
 
+# Exit on error.
 set -e
 
+# Unicode.
 LC_ALL=C.UTF-8
 LANG=C.UTF-8
 
-
+# Version info.
 printf -v info '%s' \
-"mobinfo 0.1.5 ($MACHTYPE)
+"mobinfo 0.1.6 ($MACHTYPE)
 
 Copyright (c) 2023 darkmaster @grm34 (Jeremy Pardo).
 THE SOFTWARE IS PROVIDED \"AS IS\", WITHOUT WARRANTY OF ANY KIND,
@@ -53,7 +57,7 @@ https://github.com/grm34/mobinfo/blob/main/LICENSE
 
 Written by darkmaster @grm34 (Jeremy Pardo)."
 
-
+# Manual.
 printf -v man '%s' \
 "Usage: mobinfo [OPTIONS]... <arguments>... [FILTERS]...
 
@@ -147,20 +151,36 @@ style() {
 
   # Colorize only if the terminal allows it.
   [[ ${ansi:-0} -ge 8 ]] && {
+
+    # 8-colors.
     local b=(0 0 0 0 0 0 0) f=(2 2 0 0 0 4 7)
+    
+    # 256-colors.
     local bold='\e[1m' bc='4' fc='3'
     (( ansi >= 256 )) && {
+      
+      # Themes.
       case ${thm-dark} in
-        dark)    b=(234 234 233 233 233 234 233)
-                 f=(2 2 233 233 233 140 8) ;;
-        light)   b=(248 248 252 252 252 250 255)
-                 f=(235 235 252 252 252 23 0) ;;
-        hack)    b=(234 234 233 233 233 234 10)
-                 f=(3 3 233 233 233 2 232) ;;
+        dark)
+          b=(234 234 233 233 233 234 233)
+          f=(2 2 233 233 233 140 8) 
+          ;;
+        light)
+          b=(248 248 252 252 252 250 255)
+          f=(235 235 252 252 252 23 0)
+          ;;
+        hack)
+          b=(234 234 233 233 233 234 10)
+          f=(3 3 233 233 233 2 232)
+          ;;
       esac
       bc='48;5;' && fc='38;5;'
+
+      # Custom colors: checking color combinations.
       [[ $bg ]] && check_colors "$bg" && b=("${colors[@]}")
       [[ $fg ]] && check_colors "$fg" && f=("${colors[@]}") ;}
+
+    # Colorize the table.
     printf -v rmc '\e[0m'
     color() { printf '\e[0m\e[%sm\e[%sm%s%b' "$@" ;}
     th1c="$(color "$bc${b[0]}" "$fc${f[0]}" "$bold")"
@@ -170,11 +190,13 @@ style() {
     asc3="$(color "$bc${b[4]}" "$fc${f[4]}" "$asc3" "$rmc")"
     row1c="$(color "$bc${b[5]}" "$fc${f[5]}")"
     row2c="$(color "$bc${b[6]}" "$fc${f[6]}")" ;}
+
   return 0
 }
 
 
 check_colors() {
+
   # Verify that the requested color combination is valid.
   readarray -t -d "," colors < <(printf '%s' "$1")
   (( ${#colors[@]} == 7 )) && local n && {
@@ -189,6 +211,7 @@ check_colors() {
 
 
 terminfo() {
+
   # Get size in cells to define table width.
   shopt -s checkwinsize; (:;:); [[ -z $COLUMNS ]] &&
     : "$(stty size 2>/dev/null)" && COLUMNS="${_##* }"
@@ -203,11 +226,13 @@ terminfo() {
   # Get number of colors supported by the terminal.
   [[ -t 1 && -z $ansi ]] && { ansi="${TERM//[^[:digit:]]}"
     [[ -z $ansi ]] && ansi="$(tput colors 2>/dev/null)" ;}
+
   return 0
 }
 
 
 clean_string() {
+
   # Replace unwanted html characters.
   : "${1//&amp;/\&}" && : "${_//[[:space:]]&nbsp;}"
 
@@ -221,15 +246,20 @@ clean_string() {
 
 header() {
   # Display table header or footer.
+
+  # Create header/footer according to the size of the terminal.
   local i cel1 cel2
   for((i=0; i<=$((col1 + 1)); i++)) { cel1+="$asc2" ;}
   for((i=0; i<=$((col2 + 2)); i++)) { cel2+="$asc2" ;}
   printf '%s%s%s%s%s\n' "$asc3" "$cel1" "$asc3" "$cel2" "$asc3"
+
+  # Create header cells.
   [[ $1 != 'footer' ]] && {
     printf '%s%b %-*s %s%b %-*s %s\n' "$asc1" "$th1c" "$col1" \
            "$th1" "$asc1" "$th2c" $((col2 + 1)) "$th2" "$asc1"
     printf '%s%s%s%s%s\n' \
            "$asc3" "$cel1" "$asc3" "$cel2" "$asc3" ;}
+
   return 0
 }
 
@@ -237,14 +267,21 @@ header() {
 row() {
   # Format specification text as a row of the table.
   # Cut and justify on several rows if necessary.
+
   local key="$1" column=$((col2 + 1)) word words line lines
   readarray -t -d " " words < <(printf '%s' "$2")
+
+  # Justify on several lines.  
   for word in "${words[@]}"; do
-    if (( (${#line} + ${#word}) < column )); then line+="$word " 
-    else lines+=("$line") && line= && line+="$word "
+    if (( (${#line} + ${#word}) < column )); then
+      line+="$word " 
+    else
+      lines+=("$line") && line= && line+="$word "
     fi
     [[ $word = "${words[-1]}" && $line ]] && lines+=("$line")
   done
+
+  # Create specification box.
   for line in "${lines[@]}"; do
     [[ $line != "${lines[0]}" ]] && unset key
     spaces="$(printf '%*s' $((column - ${#line})) '')"
@@ -258,6 +295,7 @@ row() {
 
 check_filters() {
   # Verify that each requested filter is found in keyword.
+
   local f filters
   readarray -t -d "," filters < <(printf '%s' "$flt")
   for f in "${filters[@]}"; do
@@ -269,8 +307,10 @@ check_filters() {
 store_specs() {
   # Manage the specifications to be displayed.
   # Return formated output array to be printed.
+
   local entry key text
   for entry in "$@"; do
+
     # Remove special chatacters for ALNUM output.
     [[ $alnum ]] && entry="${entry//[^[:alnum:][:blank:]>]}"
     
@@ -297,6 +337,7 @@ store_specs() {
     [[ $text && -z $specs_only && -z $raw ]] &&
       row "${key^}" "$text"
   done
+
   unset specs && return 0
 }
 
@@ -304,6 +345,7 @@ store_specs() {
 select_device() {
   # Display a selection form for search results.
   # Return the endpoint of the selected device/brand.
+
   [[ -z $auto ]] && {
     local d && printf '\n'
     select d in "$@"; do [[ $d ]] && break; done
@@ -317,6 +359,7 @@ get_devices() {
   # Most used way by mobinfo to get devices from an html string.
   # Alternatives are used below when the data to be
   # retrieved are on a single line (PhonesData).
+
   readarray -t devices < \
     <(printf '%s' "$html" | grep "$1" | grep -oP "$2")
   readarray -t links < \
@@ -327,6 +370,7 @@ get_devices() {
 gsmarena_request() {
   # Manage the requests made to GSMArena to obtain devices.
   # Return devices names with links as arrays.
+
   case "$1" in
     brands)
       local r=('<br><span>' '(?<=php>).*?(?=<br>)' \
@@ -341,6 +385,7 @@ gsmarena_request() {
                '(?<=href=").*?(?=">)')
       ;;
   esac
+
   get_devices "${r[@]}"
   unset html
 }
@@ -349,6 +394,7 @@ gsmarena_request() {
 phonesdata_request() {
   # Manage the requests made to PhonesData to obtain devices.
   # Return devices names with links as arrays.
+
   case "$1" in
     search|brands|comingsoon)
       local entry data r=('(?>=list-items).*?(?=</a>)')
@@ -395,6 +441,7 @@ phonesdata_request() {
 phonearena_request() {
   # Manage the requests made to PhoneArena to obtain devices.
   # Return devices names with links as arrays.
+
   case "$1" in
     brands)
       local r=('listing-item-hover' \
@@ -433,6 +480,7 @@ phonearena_request() {
 
 gsmarena_specs() {
   # Get the specs from GSMArena as an array.
+
   local r=('(?<=data-spec=").*?(?=<)')
   : "$(printf '%s' "$html" | grep -oP "${r[0]}")"
   readarray -t specs < <(printf '%s' "${_//\"}")
@@ -442,10 +490,12 @@ gsmarena_specs() {
 
 phonesdata_specs() {
   # Get the specs from PhonesData as an array.
+
   local data entry key value
   local r=('(?<=datasheet-features-type>).*?(?=<tr><td)')
   readarray -t data < \
     <(printf '%s' "$html" | grep -oP "${r[0]}")
+
   for entry in "${data[@]}"; do
     # Get keyword/description.
     key="${entry%%<*}" && : "${entry##*/>}"
@@ -454,6 +504,7 @@ phonesdata_specs() {
     [[ $key = "$value" ]] && continue
     specs+=("$key>$value")
   done
+
   unset html
 }
 
@@ -461,12 +512,15 @@ phonesdata_specs() {
 phonearena_specs() {
   # Get the specs from PhoneArena as an array.
   # TODO: better way to get data that are split on several lines.
+
   local lines entry data key value
   local r=('(?<=<tr>).*?(?=</tr>)' '(?<=<th>).*?(?=</th>)' \
            '(?<=<strong>).*?(?=</strong>)' \
            '(?<=<td>).*?(?=</td>)')
+
   readarray -t lines < <(printf '%s' "$html") && : "${lines[*]}"
   readarray -t data < <(printf '%s' "$_" | grep -oP "${r[0]}")
+
   for entry in "${data[@]}"; do
 
     # Get keyword.
@@ -487,6 +541,7 @@ phonearena_specs() {
       ! ${specs[*]} =~ ${key//:} ]] &&
         specs+=("${key//:}>${value%%<a *}")
   done
+
   unset html
 }
 
@@ -495,26 +550,23 @@ get_html() {
   # Call curl to retrieve html content as a string.
   # TODO: fix GSMArena (token required)
   case $db in
-    1)
-      html="$(curl -A "$agent" --max-time "${sec-5}" \
-                   --data "$2$3" -fsL "$1" "$verbose")"
-      ;;
-    2)
-      [[ $research ]] && {
-        html="$(curl -A "$agent" --max-time "${sec-5}" \
-                     -d "model=$3"  -fsL "$1$2" "$verbose")" ;}
-      ;;
-    3)
-      [[ $research ]] && {
-        html="$(curl -A "$agent" --max-time "${sec-5}" \
-                     -fsL "$1$2$3&search-phones" "$verbose")" ;}
-      ;;
+    1) html="$(curl -A "$agent" --max-time "${sec-5}" \
+               --data "$2$3" -fsL "$1" "$verbose")"
+       ;;
+    2) [[ $research ]] && {
+         html="$(curl -A "$agent" --max-time "${sec-5}" \
+                 -d "model=$3"  -fsL "$1$2" "$verbose")" ;}
+       ;;
+    3) [[ $research ]] && {
+         html="$(curl -A "$agent" --max-time "${sec-5}" \
+                 -fsL "$1$2$3&search-phones" "$verbose")" ;}
+       ;;
   esac
   [[ -z $html ]] && {
     local url="$2"
     [[ $endpoint != *http* ]] && url="$1$2"
     html="$(curl -A "$agent" --max-time "${sec-5}" \
-                 -fsL "$url" "$verbose")" ;}
+            -fsL "$url" "$verbose")" ;}
 }
 
 
@@ -597,7 +649,6 @@ main() {
         set -x
         : "${info[0]} [${BASH_VERSION%%-*}] $0 ${*}" >&2
         ;;
-          
       -l|--latest)
         request="latest"
         (( db == 3 )) && endpoint="phones/sort/date"
@@ -646,7 +697,6 @@ main() {
   unset info man
   run && exit 0
 }
-
 
 main "$@"
 
