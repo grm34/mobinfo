@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 #
-# Mobinfo: A command-line tool that offers mobile phone information.
+# mobinfo: A command-line tool that offers mobile phone information.
 #
 # The MIT License (MIT)
 #
@@ -24,7 +24,7 @@
 # CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
 # TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 # SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-
+# -----
 
 # Prevent sourcing.
 [[ ${BASH_SOURCE[0]} != "$0" ]] && return 1
@@ -196,8 +196,8 @@ style() {
 
 
 check_colors() {
-
   # Verify that the requested color combination is valid.
+
   readarray -t -d "," colors < <(printf '%s' "$1")
   (( ${#colors[@]} == 7 )) && local n && {
     for n in "${colors[@]}"; do
@@ -245,7 +245,6 @@ clean_string() {
 
 
 header() {
-  # Display table header or footer.
 
   # Create header/footer according to the size of the terminal.
   local i cel1 cel2
